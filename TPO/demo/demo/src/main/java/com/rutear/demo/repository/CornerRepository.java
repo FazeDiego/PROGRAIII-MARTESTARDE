@@ -23,7 +23,6 @@ public interface CornerRepository extends Neo4jRepository<Corner, String> {
                     double distance, double traffic, double risk, double timePenalty);
 
   // --- PROYECCIÓN: vecinos salientes desde un Corner ---
-  // Trae SOLO lo que Dijkstra necesita (id destino + pesos de la arista).
   interface NeighborProjection {
     String getToId();
     double getDistance();
@@ -40,5 +39,5 @@ public interface CornerRepository extends Neo4jRepository<Corner, String> {
            r.risk AS risk,
            r.timePenalty AS timePenalty
   """)
-  List<NeighborProjection> neighbors(String id);
+  List<CornerRepository.NeighborProjection> neighbors(String id);
 }
