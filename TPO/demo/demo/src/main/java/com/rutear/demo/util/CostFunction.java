@@ -1,7 +1,5 @@
 package com.rutear.demo.util;
 
-public enum CostMode { FAST, SAFE }
-
 public final class CostFunction {
   private CostFunction() {}
   public static double cost(double distance, double traffic, double risk, double timePenalty, CostMode mode){
