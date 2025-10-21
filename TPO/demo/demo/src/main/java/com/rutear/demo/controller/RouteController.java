@@ -18,4 +18,15 @@ public class RouteController {
     var mode = "SAFE".equalsIgnoreCase(req.getMode()) ? CostMode.SAFE : CostMode.FAST;
     return routing.dijkstra(req.getFrom(), req.getTo(), mode);
   }
+
+// RouteController
+@GetMapping("/dijkstra")
+public PathResponse dijkstraQuery(@RequestParam String from,
+                                  @RequestParam String to,
+                                  @RequestParam(defaultValue="FAST") String mode) {
+  var m = "SAFE".equalsIgnoreCase(mode)
+      ? com.rutear.demo.util.CostMode.SAFE
+      : com.rutear.demo.util.CostMode.FAST;
+  return routing.dijkstra(from, to, m);
+}
 }

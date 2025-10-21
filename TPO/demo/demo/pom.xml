@@ -56,6 +56,7 @@
 		<version>2.6.0</version>
 	</dependency>
 
+
 	<!-- Lombok (opcional, si te gusta reducir boilerplate) -->
 	<dependency>
 		<groupId>org.projectlombok</groupId>
