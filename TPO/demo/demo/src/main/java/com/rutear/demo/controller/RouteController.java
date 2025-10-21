@@ -6,6 +6,8 @@ import com.rutear.demo.service.RoutingService;
 import com.rutear.demo.util.CostMode;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/routes")
@@ -20,13 +22,21 @@ public class RouteController {
   }
 
 // RouteController
+// RouteController.java
 @GetMapping("/dijkstra")
-public PathResponse dijkstraQuery(@RequestParam String from,
-                                  @RequestParam String to,
-                                  @RequestParam(defaultValue="FAST") String mode) {
-  var m = "SAFE".equalsIgnoreCase(mode)
-      ? com.rutear.demo.util.CostMode.SAFE
-      : com.rutear.demo.util.CostMode.FAST;
-  return routing.dijkstra(from, to, m);
+public ResponseEntity<?> dijkstraQuery(@RequestParam String from,
+                                       @RequestParam String to,
+                                       @RequestParam(defaultValue = "FAST") String mode) {
+  try {
+    var m = "SAFE".equalsIgnoreCase(mode)
+        ? com.rutear.demo.util.CostMode.SAFE
+        : com.rutear.demo.util.CostMode.FAST;
+    return ResponseEntity.ok(routing.dijkstra(from, to, m));
+  } catch (Exception e) {
+    return ResponseEntity.status(500).body(
+        Map.of("error", e.getClass().getSimpleName(), "message", e.getMessage())
+    );
+  }
 }
+
 }
