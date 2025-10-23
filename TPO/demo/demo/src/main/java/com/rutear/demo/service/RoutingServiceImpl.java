@@ -6,6 +6,7 @@ import com.rutear.demo.dto.PathResponse;
 import com.rutear.demo.mapper.GraphMapper;
 import com.rutear.demo.model.Corner;
 import com.rutear.demo.repository.CornerRepository;
+import com.rutear.demo.repository.GraphDao;          // ✅ DAO nuevo
 import com.rutear.demo.util.CostFunction;
 import com.rutear.demo.util.CostMode;
 import org.springframework.stereotype.Service;
@@ -16,9 +17,12 @@ import java.util.*;
 public class RoutingServiceImpl implements RoutingService {
 
   private final CornerRepository repo;
+  private final GraphDao dao;                      // ✅ guardamos el DAO
 
-  public RoutingServiceImpl(CornerRepository repo) {
+  // ✅ Constructor con ambos deps (repo + dao)
+  public RoutingServiceImpl(CornerRepository repo, GraphDao dao) {
     this.repo = repo;
+    this.dao = dao;
   }
 
   static final class State {
@@ -58,19 +62,19 @@ public class RoutingServiceImpl implements RoutingService {
       if (!vis.add(cur.id)) continue;     // ya procesado
       if (cur.id.equals(to)) break;       // llegamos al destino
 
-      // expandir vecinos desde la DB (proyección)
-      var neighs = repo.neighbors(cur.id);
+      // *************** USAR DAO (Neo4jClient) ***************
+      var neighs = dao.neighbors(cur.id);
       for (var nb : neighs) {
-        double w = CostFunction.cost(nb.getDistance(), nb.getTraffic(), nb.getRisk(), nb.getTimePenalty(), mode);
+        double w = CostFunction.cost(nb.distance(), nb.traffic(), nb.risk(), nb.timePenalty(), mode);
         double alt = dist.get(cur.id) + w;
 
-        if (alt < dist.getOrDefault(nb.getToId(), Double.POSITIVE_INFINITY)) {
-          dist.put(nb.getToId(), alt);
-          prev.put(nb.getToId(), cur.id);
-          how.put(nb.getToId(), new EdgeData(
-              cur.id, nb.getToId(), nb.getDistance(), nb.getTraffic(), nb.getRisk(), nb.getTimePenalty()
+        if (alt < dist.getOrDefault(nb.toId(), Double.POSITIVE_INFINITY)) {
+          dist.put(nb.toId(), alt);
+          prev.put(nb.toId(), cur.id);
+          how.put(nb.toId(), new EdgeData(
+              cur.id, nb.toId(), nb.distance(), nb.traffic(), nb.risk(), nb.timePenalty()
           ));
-          pq.offer(new State(nb.getToId(), alt));
+          pq.offer(new State(nb.toId(), alt));
         }
       }
     }
@@ -96,6 +100,9 @@ public class RoutingServiceImpl implements RoutingService {
     double totalDist = 0, totalTime = 0, totalRisk = 0;
     for (int i = 1; i < pathIds.size(); i++) {
       var e = how.get(pathIds.get(i));
+      if (e == null) {
+        throw new IllegalStateException("Camino inconsistente al reconstruir " + pathIds.get(i-1) + "->" + pathIds.get(i));
+      }
       edges.add(new EdgeDTO(e.from(), e.to(), e.distance(), e.traffic(), e.risk(), e.timePenalty()));
       totalDist += e.distance();
       totalTime += e.timePenalty();
