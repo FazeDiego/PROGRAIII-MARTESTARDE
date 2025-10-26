@@ -13,5 +13,17 @@ public class EdgeDTO {
     this.fromId = fromId; this.toId = toId;
     this.distance = distance; this.traffic = traffic; this.risk = risk; this.timePenalty = timePenalty;
   }
-  // getters/setters
+
+  public String getFromId() { return fromId; }
+  public void setFromId(String fromId) { this.fromId = fromId; }
+  public String getToId() { return toId; }
+  public void setToId(String toId) { this.toId = toId; }
+  public double getDistance() { return distance; }
+  public void setDistance(double distance) { this.distance = distance; }
+  public double getTraffic() { return traffic; }
+  public void setTraffic(double traffic) { this.traffic = traffic; }
+  public double getRisk() { return risk; }
+  public void setRisk(double risk) { this.risk = risk; }
+  public double getTimePenalty() { return timePenalty; }
+  public void setTimePenalty(double timePenalty) { this.timePenalty = timePenalty; }
 }
