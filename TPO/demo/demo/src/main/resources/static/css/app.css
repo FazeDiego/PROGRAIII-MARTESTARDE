@@ -1,0 +1,11 @@
+body { margin:0; font:14px system-ui, -apple-system, Segoe UI, Roboto; }
+#app { display:grid; grid-template-columns: 320px 1fr; height:100vh; }
+aside { padding:14px; border-right:1px solid #ddd; overflow:auto }
+label{display:block;margin:.5rem 0 .25rem}
+input,select,button{width:100%; padding:.5rem; margin-bottom:.5rem}
+.actions { display:flex; gap:.5rem; }
+.actions button { width:50%; }
+#map { height: 100%; }
+.metric { background:#f7f7f7; padding:.5rem; margin:.25rem 0; border-radius:6px }
+.pill { display:inline-block; padding:.1rem .4rem; border:1px solid #ddd; border-radius:999px; margin-right:.25rem }
+.error { color:#b00; white-space:pre-wrap; }

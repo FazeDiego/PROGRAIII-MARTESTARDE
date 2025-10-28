@@ -20,13 +20,13 @@ public class RouteController {
     this.routing = routing;
   }
 
-  // GET "de prueba" para usar desde el browser
+  // --- DIJKSTRA (GET, para probar rápido desde el navegador) ---
   @GetMapping(value = "/dijkstra", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> dijkstraQuery(@RequestParam String from,
                                          @RequestParam String to,
                                          @RequestParam(defaultValue = "FAST") String mode) {
     try {
-      var m = "SAFE".equalsIgnoreCase(mode) ? CostMode.SAFE : CostMode.FAST;
+      CostMode m = "SAFE".equalsIgnoreCase(mode) ? CostMode.SAFE : CostMode.FAST;
       PathResponse resp = routing.dijkstra(from, to, m);
       return ResponseEntity.ok(resp);
     } catch (Exception e) {
@@ -37,17 +37,32 @@ public class RouteController {
     }
   }
 
-  // POST “real” para el front/Thunder Client
+  // --- DIJKSTRA (POST, para front/Thunder) ---
   @PostMapping(value = "/dijkstra",
                consumes = MediaType.APPLICATION_JSON_VALUE,
                produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> dijkstra(@RequestBody PathRequest req) {
     try {
-      var m = "SAFE".equalsIgnoreCase(req.getMode()) ? CostMode.SAFE : CostMode.FAST;
+      CostMode m = "SAFE".equalsIgnoreCase(req.getMode()) ? CostMode.SAFE : CostMode.FAST;
       PathResponse resp = routing.dijkstra(req.getFrom(), req.getTo(), m);
       return ResponseEntity.ok(resp);
     } catch (Exception e) {
       return ResponseEntity.status(500).body(Map.of(
+          "error", e.getClass().getSimpleName(),
+          "message", e.getMessage()
+      ));
+    }
+  }
+
+  // --- A* (GET) ---
+  @GetMapping(value = "/astar", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> astar(@RequestParam String from,
+                                 @RequestParam String to,
+                                 @RequestParam(defaultValue = "FAST") CostMode mode) {
+    try {
+      return ResponseEntity.ok(routing.astar(from, to, mode)); // <-- acá estaba el typo
+    } catch (Exception e) {
+      return ResponseEntity.status(400).body(Map.of(
           "error", e.getClass().getSimpleName(),
           "message", e.getMessage()
       ));
