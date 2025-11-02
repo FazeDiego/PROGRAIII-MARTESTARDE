@@ -11,6 +11,6 @@ public interface GraphService {
   // 🔍 POIs cercanos vía BFS (firma única y final)
   List<PoiDTO> bfsNearby(String startId, String typesCsv, int maxDepth, int limit);
   
-  // 🔍 POIs usando BFS con regex
-  List<PoiDTO> bfsPois(String startId, int depth, String typeRegex);
+  // 🔍 POIs usando BFS con Set de tipos
+  List<PoiDTO> bfsPois(String startId, int maxDepth, java.util.Set<String> types);
 }

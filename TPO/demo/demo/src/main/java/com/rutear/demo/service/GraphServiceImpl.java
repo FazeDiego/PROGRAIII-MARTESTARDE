@@ -104,7 +104,7 @@ public class GraphServiceImpl implements GraphService {
       for (var p : poisHere) {
         if (found.containsKey(p.getId())) continue;
         // seteamos profundidad donde se lo encontró
-        p.setDepth(cur.depth);
+        p.setHops(cur.depth);
         found.put(p.getId(), p);
         if (found.size() >= limit) break;
       }
@@ -125,14 +125,12 @@ public class GraphServiceImpl implements GraphService {
   }
 
   // =========================================================
-  // 🔍 NUEVO: BFS para POIs usando GraphDao.findPoisBfs
+  // 🔍 NUEVO: BFS para POIs usando GraphDao.poisNear
   // =========================================================
   @Override
-  public List<PoiDTO> bfsPois(String startId, int depth, String typeRegex) {
+  public List<PoiDTO> bfsPois(String startId, int maxDepth, java.util.Set<String> types) {
     if (!repo.existsById(startId))
       throw new IllegalArgumentException("Nodo inexistente: " + startId);
-    int d = Math.max(1, depth);
-    String regex = (typeRegex == null || typeRegex.isBlank()) ? ".*" : typeRegex;
-    return dao.findPoisBfs(startId, d, regex);
+    return dao.poisNear(startId, maxDepth, types);
   }
 }

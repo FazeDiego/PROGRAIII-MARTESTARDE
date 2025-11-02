@@ -106,18 +106,47 @@ public class GraphController {
     }
   }
 
-  // --- NUEVO: POIs cercanos con regex ---
+  // --- NUEVO: POIs cercanos con regex procesado a Set ---
   @GetMapping(value = "/pois/near", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> poisNear(
       @RequestParam String start,
       @RequestParam(defaultValue = "3") int depth,
       @RequestParam(defaultValue = "GAS|MECH|ER") String types) {
     try {
-      var list = graphService.bfsPois(start, depth, types);
+      java.util.Set<String> typeSet = null;
+      if (types != null && !types.isBlank()) {
+        typeSet = java.util.Arrays.stream(types.split("\\|"))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .collect(java.util.stream.Collectors.toSet());
+      }
+      var list = graphService.bfsPois(start, depth, typeSet);
       return ResponseEntity.ok(list);
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(
           Map.of("error", e.getClass().getSimpleName(), "message", e.getMessage())
+      );
+    }
+  }
+
+  // --- NUEVO: POIs cercanos con Set<String> ---
+  @GetMapping(value = "/poi/near", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> poiNear(
+      @RequestParam String start,
+      @RequestParam(defaultValue = "2") int maxDepth,
+      @RequestParam(required = false) String types) {
+    try {
+      java.util.Set<String> t = null;
+      if (types != null && !types.isBlank()) {
+        t = java.util.Arrays.stream(types.split("\\|"))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .collect(java.util.stream.Collectors.toSet());
+      }
+      return ResponseEntity.ok(graphService.bfsPois(start, maxDepth, t));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(
+          java.util.Map.of("error", e.getClass().getSimpleName(), "message", e.getMessage())
       );
     }
   }

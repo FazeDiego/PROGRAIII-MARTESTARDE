@@ -153,4 +153,39 @@ public class GraphDao {
         .all().stream().toList();
   }
 
+  // =====================================================
+  // 🔍 NUEVO 5: POIs cercanos por BFS (directamente desde Corner a POI)
+  // =====================================================
+  public List<PoiDTO> poisNear(String startId, int maxDepth, java.util.Set<String> types) {
+    // maxDepth de fallback
+    int depth = Math.max(1, maxDepth);
+
+    // Busca POIs conectados directamente desde Corners vía ROAD
+    String cypher = """
+        MATCH (s:Corner {id:$start})
+        MATCH p = (s)-[:ROAD*1..5]->(poi:POI)
+        WHERE length(p) <= $maxDepth
+          AND ($types IS NULL OR poi.type IN $types)
+        WITH poi, min(length(p)) AS hops
+        RETURN poi.id AS id, poi.name AS name, poi.type AS type, poi.lat AS lat, poi.lng AS lng, hops
+        ORDER BY hops ASC, name ASC
+        LIMIT 200
+      """;
+
+    return neo4j.query(cypher)
+        .bind(startId).to("start")
+        .bind(depth).to("maxDepth")
+        .bind((types == null || types.isEmpty()) ? null : types).to("types")
+        .fetchAs(PoiDTO.class)
+        .mappedBy((ts, rec) -> new PoiDTO(
+            rec.get("id").asString(),
+            rec.get("name").asString(null),
+            rec.get("type").asString(null),
+            rec.get("lat").asDouble(),
+            rec.get("lng").asDouble(),
+            rec.get("hops").asInt()
+        ))
+        .all().stream().toList();
+  }
+
 }
