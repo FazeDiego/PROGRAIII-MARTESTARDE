@@ -42,6 +42,19 @@
         <button id="btnDfs">DFS desde C1</button>
       </div>
       <div id="walk"></div>
+      <hr/>
+      <h3>Asignación de pedidos</h3>
+      <label>Pedidos (ids de corner separados por comas)</label>
+      <textarea id="orders" rows="3">C2,C5,C7,C9</textarea>
+      <label>Nº repartidores</label>
+      <input id="numCouriers" value="3" />
+      <label>Máx pedidos por repartidor</label>
+      <input id="maxPerCourier" value="2" />
+      <div class="actions">
+        <button id="btnAssign">Asignar pedidos</button>
+        <button id="btnClearAssignments">Limpiar asignaciones</button>
+      </div>
+      <div id="assignList" style="margin-top:.5rem"></div>
     </aside>
     <div id="map"></div>
   </div>

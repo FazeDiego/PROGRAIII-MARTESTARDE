@@ -1,12 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <h55>Hola mundo</h5>
+  <meta charset="utf-8" />
+  <title>Rute.AR · Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <link rel="stylesheet" href="/css/app.css"/>
 </head>
 <body>
-    
+  <div id="app">
+    <aside>
+      <h2>Rute.AR</h2>
+      <form id="routeForm">
+        <label>Desde (Corner id)</label>
+        <input id="from" value="C1" />
+        <label>Hasta (Corner id)</label>
+        <input id="to" value="C5" />
+        <label>Modo</label>
+        <select id="mode">
+          <option value="FAST">FAST</option>
+          <option value="SAFE" selected>SAFE</option>
+        </select>
+        <label>Algoritmo</label>
+        <select id="alg">
+          <option value="dijkstra" selected>Dijkstra</option>
+          <option value="astar">A*</option>
+        </select>
+        <button type="submit">Calcular ruta</button>
+      </form>
+
+      <div class="actions">
+        <button id="btnLoadCorners">Mostrar 100 esquinas</button>
+        <button id="btnClear">Limpiar</button>
+      </div>
+
+      <div id="out"></div>
+      <hr/>
+      <h3>Recorridos</h3>
+      <div class="actions">
+        <button id="btnBfs">BFS desde C1</button>
+        <button id="btnDfs">DFS desde C1</button>
+      </div>
+      <div id="walk"></div>
+      <hr/>
+      <h3>Asignación de pedidos</h3>
+      <label>Pedidos (ids de corner separados por comas)</label>
+      <textarea id="orders" rows="3">C2,C5,C7,C9</textarea>
+      <label>Nº repartidores</label>
+      <input id="numCouriers" value="3" />
+      <label>Máx pedidos por repartidor</label>
+      <input id="maxPerCourier" value="2" />
+      <div class="actions">
+        <button id="btnAssign">Asignar pedidos</button>
+        <button id="btnClearAssignments">Limpiar asignaciones</button>
+      </div>
+      <div id="assignList" style="margin-top:.5rem"></div>
+    </aside>
+    <div id="map"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script type="module" src="/js/main.js"></script>
 </body>
 </html>

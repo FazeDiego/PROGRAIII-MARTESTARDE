@@ -20,3 +20,13 @@ export async function getAllCorners(){
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
+
+export async function assignOrders(req) {
+  const res = await fetch(`${BASE}/assign`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(req)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}

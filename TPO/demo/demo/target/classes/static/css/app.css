@@ -1,0 +1,22 @@
+body { margin:0; font:14px system-ui, -apple-system, Segoe UI, Roboto; }
+#app { display:grid; grid-template-columns: 320px 1fr; height:100vh; }
+aside { padding:14px; border-right:1px solid #ddd; overflow:auto }
+label{display:block;margin:.5rem 0 .25rem}
+input,select,button{width:100%; padding:.5rem; margin-bottom:.5rem}
+.actions { display:flex; gap:.5rem; }
+.actions button { width:50%; }
+#map { height: 100%; }
+.metric { background:#f7f7f7; padding:.5rem; margin:.25rem 0; border-radius:6px }
+.pill { display:inline-block; padding:.1rem .4rem; border:1px solid #ddd; border-radius:999px; margin-right:.25rem }
+.error { color:#b00; white-space:pre-wrap; }
+
+/* Courier icon */
+.courier-divicon { }
+.courier-icon{ width:30px; height:30px; border-radius:50%; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; box-shadow:0 1px 4px rgba(0,0,0,.25); }
+
+/* Assignment list */
+#assignList .assign-row{ display:flex; gap:.5rem; align-items:center; padding:.35rem 0; border-bottom:1px solid #eee }
+#assignList .swatch{ width:14px; height:14px; border-radius:3px }
+#assignList .info{ flex:1 }
+#assignList .orders .pill{ background:#fff; border-color:#ccc }
+#assignList .actions button{ padding:.25rem .5rem; }
