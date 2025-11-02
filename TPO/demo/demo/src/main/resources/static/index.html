@@ -2,10 +2,26 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Rute.AR · Demo</title>
+  <title>Rute.AR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-  <link rel="stylesheet" href="/css/app.css"/>
+
+  <!-- OpenLayers CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.2.1/ol.css">
+
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+    #app { display: grid; grid-template-columns: 320px 1fr; height: 100vh; overflow: hidden; }
+    aside { padding: 14px; border-right: 1px solid #ddd; overflow: auto; }
+    #map { height: 100%; width: 100%; position: relative; }
+    /* OpenLayers necesita estas reglas */
+    #map canvas { max-width: none !important; }
+    .ol-viewport { height: 100%; width: 100%; }
+    label{display:block;margin:.5rem 0 .25rem}
+    input,select,button{width:100%; padding:.5rem; margin-bottom:.5rem}
+    .metric { background:#f7f7f7; padding:.5rem; margin:.25rem 0; border-radius:6px }
+    .pill { display:inline-block; padding:.1rem .4rem; border:1px solid #ddd; border-radius:999px; margin-right:.25rem }
+    .error { color:#b00; }
+  </style>
 </head>
 <body>
   <div id="app">
@@ -13,19 +29,25 @@
       <h2>Rute.AR</h2>
       <form id="routeForm">
         <label>Desde (Corner id)</label>
-        <input id="from" value="C1" />
+        <input type="text" id="from" list="cornersList" placeholder="Ej: C1">
+
         <label>Hasta (Corner id)</label>
-        <input id="to" value="C5" />
+        <input type="text" id="to" list="cornersList" placeholder="Ej: C5">
+
+        <!-- Lista de sugerencias compartida para ambos inputs -->
+        <datalist id="cornersList"></datalist>
+
         <label>Modo</label>
         <select id="mode">
           <option value="FAST">FAST</option>
           <option value="SAFE" selected>SAFE</option>
         </select>
+
         <label>Algoritmo</label>
         <select id="alg">
           <option value="dijkstra" selected>Dijkstra</option>
-          <option value="astar">A*</option>
         </select>
+
         <button type="submit">Calcular ruta</button>
       </form>
 
@@ -34,19 +56,39 @@
         <button id="btnClear">Limpiar</button>
       </div>
 
-      <div id="out"></div>
+      <div class="box" style="margin-top:10px;">
+        <label style="display:flex;align-items:center;gap:.5rem;">
+          <input id="showServices" type="checkbox" checked />
+          Mostrar servicios cercanos (BFS)
+        </label>
+        <div style="display:grid;grid-template-columns:1fr 1fr; gap:.5rem; margin-top:.5rem;">
+          <div>
+            <label>Profundidad</label>
+            <input id="svcDepth" type="number" min="1" max="6" value="3" />
+          </div>
+          <div>
+            <label>Tipos</label>
+            <input id="svcTypes" type="text" value="GAS|MECH|ER" />
+          </div>
+        </div>
+        <button id="btnRefreshServices" type="button" style="margin-top:.5rem;">Actualizar servicios</button>
+      </div>
+
+      <div id="out" style="margin-top:.75rem"></div>
       <hr/>
       <h3>Recorridos</h3>
-      <div class="actions">
-        <button id="btnBfs">BFS desde C1</button>
-        <button id="btnDfs">DFS desde C1</button>
-      </div>
+      <button id="btnBfs">BFS desde C1</button>
+      <button id="btnDfs">DFS desde C1</button>
       <div id="walk"></div>
     </aside>
+
     <div id="map"></div>
   </div>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- OpenLayers JS -->
+  <script src="https://cdn.jsdelivr.net/npm/ol@v10.2.1/dist/ol.js"></script>
+
+  <!-- Nuestros módulos -->
   <script type="module" src="/js/main.js"></script>
 </body>
 </html>
