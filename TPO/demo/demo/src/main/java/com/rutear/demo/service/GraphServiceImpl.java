@@ -1,5 +1,6 @@
 package com.rutear.demo.service;
 
+import com.rutear.demo.dto.PoiDTO;               // 👈 nuevo import
 import com.rutear.demo.dto.TraversalResponse;
 import com.rutear.demo.repository.CornerRepository;
 import com.rutear.demo.repository.GraphDao;
@@ -70,5 +71,68 @@ public class GraphServiceImpl implements GraphService {
       });
     }
     return new TraversalResponse(startId, "DFS", order, null);
+  }
+
+  // =========================================================
+  // 🔍 NUEVO: BFS para encontrar POIs cercanos al startId
+  // =========================================================
+  public List<PoiDTO> bfsNearby(String startId, String typesCsv, int maxDepth, int limit) {
+    if (!repo.existsById(startId))
+      throw new IllegalArgumentException("Nodo inexistente: " + startId);
+    if (maxDepth < 0) maxDepth = 0;
+    if (limit <= 0) limit = 10;
+
+    // Tipos a filtrar (puede ser null para "todos")
+    List<String> types = GraphDao.parseTypes(typesCsv);
+
+    // Cola con profundidad
+    record Item(String id, int depth) {}
+    Queue<Item> q = new ArrayDeque<>();
+    Set<String> visCorners = new HashSet<>();
+
+    // Usamos LinkedHashMap para evitar duplicados y preservar orden de hallazgo
+    Map<String, PoiDTO> found = new LinkedHashMap<>();
+
+    q.add(new Item(startId, 0));
+    visCorners.add(startId);
+
+    while (!q.isEmpty() && found.size() < limit) {
+      Item cur = q.poll();
+
+      // 1) POIs en la esquina actual
+      var poisHere = dao.poisAtCorner(cur.id, types);
+      for (var p : poisHere) {
+        if (found.containsKey(p.getId())) continue;
+        // seteamos profundidad donde se lo encontró
+        p.setDepth(cur.depth);
+        found.put(p.getId(), p);
+        if (found.size() >= limit) break;
+      }
+      if (found.size() >= limit) break;
+
+      // 2) Expandir vecinos si no superamos profundidad
+      if (cur.depth < maxDepth) {
+        dao.neighbors(cur.id).forEach(nb -> {
+          String v = nb.toId();
+          if (visCorners.add(v)) {
+            q.add(new Item(v, cur.depth + 1));
+          }
+        });
+      }
+    }
+
+    return new ArrayList<>(found.values());
+  }
+
+  // =========================================================
+  // 🔍 NUEVO: BFS para POIs usando GraphDao.findPoisBfs
+  // =========================================================
+  @Override
+  public List<PoiDTO> bfsPois(String startId, int depth, String typeRegex) {
+    if (!repo.existsById(startId))
+      throw new IllegalArgumentException("Nodo inexistente: " + startId);
+    int d = Math.max(1, depth);
+    String regex = (typeRegex == null || typeRegex.isBlank()) ? ".*" : typeRegex;
+    return dao.findPoisBfs(startId, d, regex);
   }
 }

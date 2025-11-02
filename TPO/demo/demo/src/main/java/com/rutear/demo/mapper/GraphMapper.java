@@ -9,8 +9,11 @@ public class GraphMapper {
   public static CornerDTO toDTO(Corner c){
     return new CornerDTO(c.getId(), c.getName(), c.getLat(), c.getLng());
   }
+
   public static EdgeDTO toDTO(String fromId, Road r){
     return new EdgeDTO(fromId, r.getTo().getId(),
             r.getDistance(), r.getTraffic(), r.getRisk(), r.getTimePenalty());
   }
+
+  
 }
