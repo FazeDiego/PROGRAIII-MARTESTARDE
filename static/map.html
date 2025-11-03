@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Rute.AR · Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <link rel="stylesheet" href="/css/app.css"/>
+  <link rel="stylesheet" href="./css/shop.css" />
+</head>
+<body>
+  <header class="navbar">
+  <div class="nav-content">
+    <div class="logo">Rute.AR</div>
+    <nav>
+      <a href="/shop.html">Shop</a>
+      <a href="/map.html" class="active">Ver recorrido</a>
+    </nav>
+    <div id="openCart" class="cart-icon">
+      <img class="cart-img" src="./images/carticon.png" alt="cart" />
+      <span id="cartCount">0</span>
+    </div>
+    <button id="openInfo" class="info-btn">¿Cómo funciona?</button>
+  </div>
+</header>
+<style>
+  .cart-icon,
+  .info-btn {
+    display: none !important;
+  }
+</style>
+
+  <div id="app">
+    <aside>
+      <h2>Rute.AR</h2>
+      <form id="routeForm">
+        <label>Desde (Corner id)</label>
+        <input id="from" value="C1" />
+        <label>Hasta (Corner id)</label>
+        <input id="to" value="C5" />
+        <label>Modo</label>
+        <select id="mode">
+          <option value="FAST">FAST</option>
+          <option value="SAFE" selected>SAFE</option>
+        </select>
+        <label>Algoritmo</label>
+        <select id="alg">
+          <option value="dijkstra" selected>Dijkstra</option>
+          <option value="astar">A*</option>
+        </select>
+        <button type="submit">Calcular ruta</button>
+      </form>
+
+      <div class="actions">
+        <button id="btnLoadCorners">Mostrar 100 esquinas</button>
+        <button id="btnClear">Limpiar</button>
+      </div>
+
+      <div id="out"></div>
+      <hr/>
+      <h3>Recorridos</h3>
+      <div class="actions">
+        <button id="btnBfs">BFS desde C1</button>
+        <button id="btnDfs">DFS desde C1</button>
+      </div>
+      <div id="walk"></div>
+    </aside>
+    <div id="map"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

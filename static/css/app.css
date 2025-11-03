@@ -1,0 +1,87 @@
+body { margin:0; font:14px system-ui, -apple-system, Segoe UI, Roboto; }
+#app { display:grid; grid-template-columns: 320px 1fr; height:100vh; }
+aside { padding:14px; border-right:1px solid #ddd; overflow:auto }
+label{display:block;margin:.5rem 0 .25rem}
+input,select,button{width:100%; padding:.5rem; margin-bottom:.5rem}
+.actions { display:flex; gap:.5rem; }
+.actions button { width:50%; }
+#map { height: 100%; }
+.metric { background:#f7f7f7; padding:.5rem; margin:.25rem 0; border-radius:6px }
+.pill { display:inline-block; padding:.1rem .4rem; border:1px solid #ddd; border-radius:999px; margin-right:.25rem }
+.error { color:#b00; white-space:pre-wrap; }
+:root {
+  --brand: #3bb3c3;
+  --brand2: #297882;
+  --brand3: #bee7ec9e;
+  --bg: #309aa87c;
+  --white: #ffffff;
+  --gray: #8ca3a8;
+  --text: #1a2e35;
+  --card-border: #d9e8e9;
+  --radius: 14px;
+}
+/*esto lo agregue para la navbar!!*/
+body {
+  font-family: "Poppins", sans-serif;
+}
+.navbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--card-border);
+  padding: 14px 0;
+  position: sticky;
+  top: 0;
+  z-index: 20000;
+}
+.nav-content {
+  max-width: 1100px;
+  margin: auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+}
+.logo {
+  font-weight: 900;
+  font-size: 30px;
+  color: var(--brand);
+}
+nav {
+  margin-left: 30px;
+}
+nav a {
+  margin-right: 16px;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+}
+nav a.active {
+  color: var(--brand);
+  text-decoration: underline;
+}
+.cart-icon {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+.cart-img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+.cart-icon span {
+  background: var(--brand);
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  margin-left: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#map ~ .cart-icon,
+#map ~ .info-btn {
+  display: none !important;
+}
+
