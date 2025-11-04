@@ -41,6 +41,32 @@ public class GraphDao {
         .all();
   }
 
+  // ================= NUEVO: CARGAR TODO EL GRAFO =================
+  // Obtiene TODAS las aristas del grafo de una sola vez
+  public record GraphEdge(String fromId, String toId, double distance, double traffic, double risk, double timePenalty) {}
+  
+  public List<GraphEdge> loadAllEdges() {
+    return neo4j.query("""
+        MATCH (a:Corner)-[r:ROAD]->(b:Corner)
+        RETURN a.id AS fromId,
+               b.id AS toId,
+               r.distance AS distance,
+               r.traffic AS traffic,
+               r.risk AS risk,
+               r.timePenalty AS timePenalty
+        """)
+        .fetchAs(GraphEdge.class)
+        .mappedBy((ts, rec) -> new GraphEdge(
+            rec.get("fromId").asString(),
+            rec.get("toId").asString(),
+            rec.get("distance").asDouble(),
+            rec.get("traffic").asDouble(),
+            rec.get("risk").asDouble(),
+            rec.get("timePenalty").asDouble()
+        ))
+        .all().stream().toList();
+  }
+
   // ================= EXISTENTE =================
   // Listar todos los Corners (para el front)
   public List<CornerDTO> allCorners(int limit) {

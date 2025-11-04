@@ -1,8 +1,10 @@
 package com.rutear.demo.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 
 public class PathResponse {
+  @JsonIgnore // Evitar serialización que dispara lazy loading
   private List<CornerDTO> nodes;
   private List<String> nodeIds; // IDs de nodos para evitar lazy loading
   private List<EdgeDTO> edges;

@@ -2,6 +2,7 @@ package com.rutear.demo.service;
 
 import com.rutear.demo.dto.CornerDTO;
 import com.rutear.demo.dto.EdgeDTO;
+import com.rutear.demo.dto.NeighborRow;
 import com.rutear.demo.dto.PathResponse;
 import com.rutear.demo.mapper.GraphMapper;
 import com.rutear.demo.model.Corner;
@@ -10,6 +11,7 @@ import com.rutear.demo.repository.GraphDao;
 import com.rutear.demo.util.CostFunction;
 import com.rutear.demo.util.CostMode;
 import org.springframework.stereotype.Service;
+import jakarta.annotation.PostConstruct;
 
 import java.util.*;
 
@@ -18,10 +20,31 @@ public class RoutingServiceImpl implements RoutingService {
 
   private final CornerRepository repo;
   private final GraphDao dao;
+  
+  // CACHÉ EN MEMORIA: Map<nodoId, List<vecinos>>
+  private Map<String, List<NeighborRow>> graphCache;
 
   public RoutingServiceImpl(CornerRepository repo, GraphDao dao) {
     this.repo = repo;
     this.dao = dao;
+  }
+  
+  @PostConstruct
+  public void loadGraphToMemory() {
+    System.out.println("🔄 Cargando grafo completo en memoria...");
+    long start = System.currentTimeMillis();
+    
+    List<GraphDao.GraphEdge> allEdges = dao.loadAllEdges();
+    graphCache = new HashMap<>();
+    
+    for (var edge : allEdges) {
+      graphCache.computeIfAbsent(edge.fromId(), k -> new ArrayList<>())
+          .add(new NeighborRow(edge.toId(), edge.distance(), edge.traffic(), edge.risk(), edge.timePenalty()));
+    }
+    
+    long elapsed = System.currentTimeMillis() - start;
+    System.out.println("✅ Grafo cargado: " + allEdges.size() + " aristas, " + 
+                       graphCache.size() + " nodos, " + elapsed + " ms");
   }
 
   static final class State {
@@ -37,9 +60,9 @@ public class RoutingServiceImpl implements RoutingService {
 
   @Override
   public PathResponse dijkstra(String from, String to, CostMode mode) {
-    // validaciones básicas
-    if (!repo.existsById(from)) throw new IllegalArgumentException("Nodo origen inexistente: " + from);
-    if (!repo.existsById(to))   throw new IllegalArgumentException("Nodo destino inexistente: " + to);
+    // Validaciones comentadas por rendimiento - si el nodo no existe, no habrá camino
+    // if (!repo.existsById(from)) throw new IllegalArgumentException("Nodo origen inexistente: " + from);
+    // if (!repo.existsById(to))   throw new IllegalArgumentException("Nodo destino inexistente: " + to);
     if (from.equals(to)) {
       // No cargar el Corner para evitar lazy loading
       PathResponse response = new PathResponse(List.of(), List.of(), 0, 0, 0, 0);
@@ -61,7 +84,8 @@ public class RoutingServiceImpl implements RoutingService {
       if (!vis.add(cur.id)) continue;     // ya procesado
       if (cur.id.equals(to)) break;       // llegamos al destino
 
-      var neighs = dao.neighbors(cur.id);
+      // OPTIMIZACIÓN: Usar caché en memoria en lugar de consultar BD
+      var neighs = graphCache.getOrDefault(cur.id, List.of());
       for (var nb : neighs) {
         double w = CostFunction.cost(nb.distance(), nb.traffic(), nb.risk(), nb.timePenalty(), mode);
         double alt = dist.get(cur.id) + w;
@@ -115,8 +139,9 @@ public class RoutingServiceImpl implements RoutingService {
   // ==========================
   @Override
   public PathResponse astar(String from, String to, CostMode mode) {
-    if (!repo.existsById(from)) throw new IllegalArgumentException("Nodo origen inexistente: " + from);
-    if (!repo.existsById(to))   throw new IllegalArgumentException("Nodo destino inexistente: " + to);
+    // Validaciones comentadas por rendimiento - si el nodo no existe, no habrá camino
+    // if (!repo.existsById(from)) throw new IllegalArgumentException("Nodo origen inexistente: " + from);
+    // if (!repo.existsById(to))   throw new IllegalArgumentException("Nodo destino inexistente: " + to);
 
     record AState(String id, double g, double f) {}
 
@@ -150,7 +175,8 @@ public class RoutingServiceImpl implements RoutingService {
       AState cur = open.poll();
       if (cur.id().equals(to)) break;
 
-      var neighs = dao.neighbors(cur.id());
+      // OPTIMIZACIÓN: Usar caché en memoria en lugar de consultar BD
+      var neighs = graphCache.getOrDefault(cur.id(), List.of());
       for (var nb : neighs) {
         double w = CostFunction.cost(nb.distance(), nb.traffic(), nb.risk(), nb.timePenalty(), mode);
         double tentative = gScore.get(cur.id()) + w;
