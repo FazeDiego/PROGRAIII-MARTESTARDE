@@ -133,4 +133,29 @@ public class GraphServiceImpl implements GraphService {
       throw new IllegalArgumentException("Nodo inexistente: " + startId);
     return dao.poisNear(startId, maxDepth, types);
   }
+
+  // =========================================================
+  // 🔍 NUEVO: Buscar POIs cercanos simplificado
+  // =========================================================
+  @Override
+  public List<PoiDTO> findNearbyPois(String startId, int depth, String typesCsv) {
+    if (!repo.existsById(startId))
+      throw new IllegalArgumentException("Nodo inexistente: " + startId);
+    
+    // Convertir CSV a array de strings
+    String[] typesArray = null;
+    if (typesCsv != null && !typesCsv.isBlank()) {
+      typesArray = java.util.Arrays.stream(typesCsv.split("[,|]"))
+          .map(String::trim)
+          .filter(s -> !s.isEmpty())
+          .toArray(String[]::new);
+    }
+    
+    // Si no hay tipos, usar un array vacío o valores por defecto
+    if (typesArray == null || typesArray.length == 0) {
+      typesArray = new String[]{"GAS", "MECH", "ER"};
+    }
+    
+    return dao.findNearbyPois(startId, depth, typesArray);
+  }
 }

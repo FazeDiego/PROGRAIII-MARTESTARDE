@@ -150,4 +150,19 @@ public class GraphController {
       );
     }
   }
+
+  // --- NUEVO: POIs cercanos con tipos CSV (para compatibilidad) ---
+  @GetMapping(value = "/nearby-pois", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> nearbyPois(
+      @RequestParam String start,
+      @RequestParam(defaultValue = "2") int depth,
+      @RequestParam(defaultValue = "GAS,MECH,ER") String types) {
+    try {
+      return ResponseEntity.ok(graphService.findNearbyPois(start, depth, types));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(
+          Map.of("error", e.getClass().getSimpleName(), "message", e.getMessage())
+      );
+    }
+  }
 }

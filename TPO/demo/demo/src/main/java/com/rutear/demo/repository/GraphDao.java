@@ -188,4 +188,37 @@ public class GraphDao {
         .all().stream().toList();
   }
 
+  // =====================================================
+  // 🔍 NUEVO 6: POIs cercanos usando UNWIND range (para Neo4j Aura)
+  // =====================================================
+  public List<PoiDTO> findNearbyPois(String startId, int depth, String[] types) {
+    return neo4j.query("""
+        MATCH (c0:Corner {id:$start})
+        UNWIND range(1,$depth) AS d
+        MATCH path = (c0)-[:ROAD*1..d]->(poi:POI)
+        WHERE poi.type IN $types
+        RETURN DISTINCT poi.id   AS id,
+                        poi.name AS name,
+                        poi.type AS type,
+                        poi.lat  AS lat,
+                        poi.lng  AS lng,
+                        d AS hops
+        ORDER BY type, id
+        LIMIT 300
+        """)
+        .bind(startId).to("start")
+        .bind(depth).to("depth")
+        .bind(java.util.Arrays.asList(types)).to("types")
+        .fetchAs(PoiDTO.class)
+        .mappedBy((rs, rec) -> new PoiDTO(
+            rec.get("id").asString(),
+            rec.get("name").asString(null),
+            rec.get("type").asString(),
+            rec.get("lat").asDouble(),
+            rec.get("lng").asDouble(),
+            rec.get("hops").asInt(0)
+        ))
+        .all().stream().toList();
+  }
+
 }

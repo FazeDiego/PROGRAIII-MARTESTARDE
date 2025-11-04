@@ -13,4 +13,7 @@ public interface GraphService {
   
   // 🔍 POIs usando BFS con Set de tipos
   List<PoiDTO> bfsPois(String startId, int maxDepth, java.util.Set<String> types);
+  
+  // 🔍 POIs cercanos simplificado
+  List<PoiDTO> findNearbyPois(String startId, int depth, String typesCsv);
 }
