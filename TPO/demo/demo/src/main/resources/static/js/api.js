@@ -1,6 +1,22 @@
 // js/api.js
 const BASE = ""; // si servís el front desde el mismo backend, dejá vacío
 
+export async function apiGet(endpoint) {
+  const res = await fetch(`${BASE}${endpoint}`, { headers: { "Accept": "application/json" } });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiPost(endpoint, data) {
+  const res = await fetch(`${BASE}${endpoint}`, {
+    method: 'POST',
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 export async function getRoute(alg, from, to, mode) {
   const url = `${BASE}/routes/${alg}?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&mode=${encodeURIComponent(mode)}`;
   const res = await fetch(url, { headers:{ "Accept":"application/json" }});

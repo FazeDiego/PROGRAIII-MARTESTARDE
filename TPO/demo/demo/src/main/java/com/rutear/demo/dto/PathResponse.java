@@ -4,6 +4,7 @@ import java.util.List;
 
 public class PathResponse {
   private List<CornerDTO> nodes;
+  private List<String> nodeIds; // IDs de nodos para evitar lazy loading
   private List<EdgeDTO> edges;
   private double totalCost;
   private double totalDistance;
@@ -25,6 +26,8 @@ public class PathResponse {
 
   public List<CornerDTO> getNodes() { return nodes; }
   public void setNodes(List<CornerDTO> nodes) { this.nodes = nodes; }
+  public List<String> getNodeIds() { return nodeIds; }
+  public void setNodeIds(List<String> nodeIds) { this.nodeIds = nodeIds; }
   public List<EdgeDTO> getEdges() { return edges; }
   public void setEdges(List<EdgeDTO> edges) { this.edges = edges; }
   public double getTotalCost() { return totalCost; }

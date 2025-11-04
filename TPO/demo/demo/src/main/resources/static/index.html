@@ -21,6 +21,12 @@
     .metric { background:#f7f7f7; padding:.5rem; margin:.25rem 0; border-radius:6px }
     .pill { display:inline-block; padding:.1rem .4rem; border:1px solid #ddd; border-radius:999px; margin-right:.25rem }
     .error { color:#b00; }
+    .success { background:#d1fae5; color:#065f46; padding:.5rem; border-radius:6px; margin:.5rem 0; }
+    .box { border:1px solid #e5e7eb; border-radius:8px; }
+    .delivery-item { background:#fff; padding:.5rem; margin:.25rem 0; border-radius:6px; border-left:4px solid #3b82f6; font-size:0.9rem; }
+    .assignment-box { background:#fff; padding:.75rem; margin:.5rem 0; border-radius:8px; border-left:4px solid #3b82f6; }
+    .assignment-box h4 { margin-top:0; color:#1e40af; }
+    .assignment-box ul { margin:.5rem 0; padding-left:1.5rem; }
   </style>
 </head>
 <body>
@@ -75,6 +81,44 @@
       </div>
 
       <div id="out" style="margin-top:.75rem"></div>
+      <hr/>
+      
+      <!-- MÓDULO DE ASIGNACIÓN DE PEDIDOS -->
+      <h3>🚴 Asignación de Pedidos (Greedy)</h3>
+      <div class="box" style="background:#f0f9ff; padding:10px; margin:10px 0;">
+        <h4 style="margin-top:0;">Generar Escenario</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:.5rem;">
+          <div>
+            <label>Repartidores</label>
+            <input id="numDeliveryPersons" type="number" min="1" max="10" value="3" />
+          </div>
+          <div>
+            <label>Pedidos</label>
+            <input id="numOrders" type="number" min="1" max="20" value="5" />
+          </div>
+        </div>
+        <button id="btnGenerateDelivery" style="margin-top:.5rem; background:#3b82f6;">Generar Aleatorio</button>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-top:.5rem;">
+          <button id="btnAddDeliveryPerson" type="button" style="font-size:0.9rem;">➕ Agregar Repartidor</button>
+          <button id="btnAddOrder" type="button" style="font-size:0.9rem;">➕ Agregar Pedido</button>
+        </div>
+      </div>
+
+      <div class="box" style="background:#fff7ed; padding:10px; margin:10px 0;">
+        <label>Modo de ruta</label>
+        <select id="deliveryMode">
+          <option value="FAST">FAST</option>
+          <option value="SAFE" selected>SAFE</option>
+        </select>
+        <button id="btnAssignOrders" style="margin-top:.5rem; background:#10b981;">🎯 Asignar Pedidos (Greedy)</button>
+        <button id="btnClearDelivery" style="margin-top:.25rem; background:#ef4444;">Limpiar</button>
+      </div>
+
+      <div id="deliveryPersonsList" style="margin-top:.5rem; max-height:150px; overflow-y:auto;"></div>
+      <div id="ordersList" style="margin-top:.5rem; max-height:150px; overflow-y:auto;"></div>
+      <div id="deliveryOutput" style="margin-top:.5rem; max-height:250px; overflow-y:auto;"></div>
+      
       <hr/>
       <h3>Recorridos</h3>
       <button id="btnBfs">BFS desde C1</button>

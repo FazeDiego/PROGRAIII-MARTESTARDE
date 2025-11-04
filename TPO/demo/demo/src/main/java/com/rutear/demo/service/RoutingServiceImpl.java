@@ -41,8 +41,10 @@ public class RoutingServiceImpl implements RoutingService {
     if (!repo.existsById(from)) throw new IllegalArgumentException("Nodo origen inexistente: " + from);
     if (!repo.existsById(to))   throw new IllegalArgumentException("Nodo destino inexistente: " + to);
     if (from.equals(to)) {
-      Corner only = repo.findById(from).orElseThrow();
-      return new PathResponse(List.of(GraphMapper.toDTO(only)), List.of(), 0, 0, 0, 0);
+      // No cargar el Corner para evitar lazy loading
+      PathResponse response = new PathResponse(List.of(), List.of(), 0, 0, 0, 0);
+      response.setNodeIds(List.of(from)); // Un solo nodo
+      return response;
     }
 
     PriorityQueue<State> pq = new PriorityQueue<>(Comparator.comparingDouble(s -> s.cost));
@@ -84,9 +86,10 @@ public class RoutingServiceImpl implements RoutingService {
     for (String at = to; at != null; at = prev.get(at)) pathIds.add(at);
     Collections.reverse(pathIds);
 
-    // cargar nodos y mapear DTOs
+    // NO cargar nodos para evitar lazy loading masivo
+    // Los nodos se cargarán solo cuando se necesiten para visualización
     List<CornerDTO> nodes = new ArrayList<>();
-    for (String id : pathIds) nodes.add(GraphMapper.toDTO(repo.findById(id).orElseThrow()));
+    // COMENTADO: for (String id : pathIds) nodes.add(GraphMapper.toDTO(repo.findById(id).orElseThrow()));
 
     // aristas + totales
     List<EdgeDTO> edges = new ArrayList<>();
@@ -102,7 +105,9 @@ public class RoutingServiceImpl implements RoutingService {
       totalRisk += e.risk();
     }
 
-    return new PathResponse(nodes, edges, dist.get(to), totalDist, totalTime, totalRisk);
+    PathResponse response = new PathResponse(nodes, edges, dist.get(to), totalDist, totalTime, totalRisk);
+    response.setNodeIds(new ArrayList<>(pathIds)); // Guardar IDs para evitar lazy loading
+    return response;
   }
 
   // ==========================
@@ -171,9 +176,9 @@ public class RoutingServiceImpl implements RoutingService {
     for (String at = to; at != null; at = prev.get(at)) pathIds.add(at);
     Collections.reverse(pathIds);
 
-    // nodos DTO
+    // NO cargar nodos para evitar lazy loading masivo
     List<CornerDTO> nodes = new ArrayList<>();
-    for (String id : pathIds) nodes.add(GraphMapper.toDTO(repo.findById(id).orElseThrow()));
+    // COMENTADO: for (String id : pathIds) nodes.add(GraphMapper.toDTO(repo.findById(id).orElseThrow()));
 
     // aristas + totales
     List<EdgeDTO> edges = new ArrayList<>();
@@ -186,7 +191,9 @@ public class RoutingServiceImpl implements RoutingService {
       totalRisk += e.risk();
     }
 
-    return new PathResponse(nodes, edges, gScore.get(to), totalDist, totalTime, totalRisk);
+    PathResponse response = new PathResponse(nodes, edges, gScore.get(to), totalDist, totalTime, totalRisk);
+    response.setNodeIds(new ArrayList<>(pathIds)); // Guardar IDs para evitar lazy loading
+    return response;
   }
 
   // ---- heurística local (metros) para no depender de otra clase ----

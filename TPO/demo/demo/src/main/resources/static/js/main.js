@@ -1,6 +1,7 @@
 // main.js
 import { getRoute, traversal, getCorner, listCorners, findPoisBfs } from "./api.js";
 import { initMap, drawRoute, plotCorners, plotPois, clearAll, clearPois } from "./map.js";
+import { initDelivery } from "./delivery.js";
 
 const $ = (s) => document.querySelector(s);
 
@@ -137,4 +138,7 @@ function wireEvents(){
   } catch (e) { console.warn(e); }
 
   wireEvents();
+  
+  // Inicializar módulo de delivery
+  initDelivery();
 })();
