@@ -42,3 +42,34 @@ export async function findPoisBfs(start, depth = 3, types = "GAS|MECH|ER"){
   if (!res.ok) throw new Error(await res.text());
   return res.json(); // [{id,name,type,lat,lng}, ...]
 }
+
+// Nueva función para POIs con el endpoint alternativo
+export async function getNearbyPOIs(start, maxDepth = 2, types = []) {
+  const q = new URLSearchParams({
+    start,
+    maxDepth: String(maxDepth),
+    types: types.join("|")
+  });
+  const res = await fetch(`${BASE}/graph/poi/near?${q}`, { headers: { Accept: "application/json" } });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json(); // [{id,name,type,lat,lng,hops}, ...]
+}
+
+// Función simplificada para POIs cercanos
+export async function getNearbyPois(start, depth, typesCsv){
+  const url = `${BASE}/graph/nearby-pois?start=${encodeURIComponent(start)}&depth=${depth}&types=${encodeURIComponent(typesCsv)}`;
+  const res = await fetch(url, { headers:{ "Accept":"application/json" }});
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// Asignación de pedidos a repartidores
+export async function assignOrders(req) {
+  const res = await fetch(`${BASE}/assign`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(req)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
