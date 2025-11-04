@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Rute.AR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- OpenLayers CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.2.1/ol.css">
+  
+  <!-- Fuente Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --brand: #3bb3c3;
+      --brand2: #297882;
+      --white: #ffffff;
+      --text: #1a2e35;
+      --card-border: #d9e8e9;
+    }
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: "Poppins", sans-serif; }
+    
+    /* Navbar */
+    .navbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--card-border);
+      padding: 14px 0;
+      position: sticky;
+      top: 0;
+      z-index: 20000;
+    }
+    .nav-content {
+      max-width: 100%;
+      margin: auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+    }
+    .logo {
+      font-weight: 900;
+      font-size: 30px;
+      color: var(--brand);
+    }
+    nav {
+      margin-left: 30px;
+    }
+    nav a {
+      margin-right: 16px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 600;
+    }
+    nav a.active {
+      color: var(--brand);
+      text-decoration: underline;
+    }
+    .info-btn {
+      margin-left: auto;
+      background: var(--brand);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: "Poppins", sans-serif;
+    }
+    .info-btn:hover {
+      background: var(--brand2);
+    }
+    
+    /* Layout principal */
+    #app { display: grid; grid-template-columns: 320px 1fr; height: calc(100vh - 60px); overflow: hidden; }
+    aside { padding: 14px; border-right: 1px solid #ddd; overflow: auto; }
+    #map { height: 100%; width: 100%; position: relative; }
+    /* OpenLayers necesita estas reglas */
+    #map canvas { max-width: none !important; }
+    .ol-viewport { height: 100%; width: 100%; }
+    label{display:block;margin:.5rem 0 .25rem}
+    input,select,button{width:100%; padding:.5rem; margin-bottom:.5rem}
+    .metric { background:#f7f7f7; padding:.5rem; margin:.25rem 0; border-radius:6px }
+    .pill { display:inline-block; padding:.1rem .4rem; border:1px solid #ddd; border-radius:999px; margin-right:.25rem }
+    .error { color:#b00; }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-content">
+      <div class="logo">Rute.AR</div>
+      <nav>
+        <a href="/shop.html">Shop</a>
+        <a href="/map.html" class="active">Ver recorrido</a>
+      </nav>
+    </div>
+  </header>
+  
+  <div id="app">
+    <aside>
+      <form id="routeForm">
+        <label>Desde (Corner id)</label>
+        <input type="text" id="from" list="cornersList" placeholder="Ej: C10">
+
+        <label>Hasta (Corner id)</label>
+        <input type="text" id="to" list="cornersList" placeholder="Ej: C210">
+
+        <!-- Lista de sugerencias compartida para ambos inputs -->
+        <datalist id="cornersList"></datalist>
+
+        <label>Modo</label>
+        <select id="mode">
+          <option value="FAST">FAST</option>
+          <option value="SAFE" selected>SAFE</option>
+        </select>
+
+        <label>Algoritmo</label>
+        <select id="alg">
+          <option value="dijkstra" selected>Dijkstra</option>
+        </select>
+
+        <button type="submit">Calcular ruta</button>
+      </form>
+
+      <div class="actions">
+        <button id="btnLoadCorners">Mostrar todas las esquinas</button>
+        <button id="btnClear">Limpiar</button>
+      </div>
+
+      <div class="box" style="margin-top:10px;">
+        <label style="display:flex;align-items:center;gap:.5rem;">
+          <input id="showServices" type="checkbox" checked />
+          Mostrar servicios cercanos (BFS)
+        </label>
+        
+        <label>Tipos</label>
+        <select id="poiTypes">
+          <option value="GAS,MECH,ER">Todos</option>
+          <option value="GAS">GAS</option>
+          <option value="MECH">MECH</option>
+          <option value="ER">ER</option>
+        </select>
+
+        <label>Profundidad BFS</label>
+        <input id="poiDepth" type="number" min="1" max="6" value="3" />
+
+        <button id="btnRefreshServices" type="button" style="margin-top:.5rem;">Actualizar servicios</button>
+      </div>
+
+      <div id="out" style="margin-top:.75rem"></div>
+
+      <hr/>
+      <h3>Asignación de pedidos</h3>
+      <label>Pedidos (ids de corner separados por comas)</label>
+      <textarea id="orders" rows="3" style="width:100%; padding:.5rem;">C2,C5,C7,C9</textarea>
+      <label>Nº repartidores</label>
+      <input id="numCouriers" type="number" value="3" />
+      <label>Máx pedidos por repartidor</label>
+      <input id="maxPerCourier" type="number" value="2" />
+      <div class="actions">
+        <button id="btnAssign">Asignar pedidos</button>
+        <button id="btnClearAssignments">Limpiar asignaciones</button>
+      </div>
+      <div id="assignList" style="margin-top:.5rem"></div>
+    </aside>
+
+    <div id="map"></div>
+  </div>
+
+  <!-- OpenLayers JS -->
+  <script src="https://cdn.jsdelivr.net/npm/ol@v10.2.1/dist/ol.js"></script>
+
+  <!-- Nuestros módulos -->
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

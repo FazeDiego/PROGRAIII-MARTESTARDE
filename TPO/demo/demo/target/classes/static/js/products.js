@@ -1,0 +1,22 @@
+window.PRODUCTS = [
+  {id:1, name:"Agua mineral 2L", category:"Bebidas", weightKg:2.10, slots:1, utility:5, img:"./images/agua.webp"},
+  {id:2, name:"Gaseosa 1.5L", category:"Bebidas", weightKg:1.60, slots:1, utility:4, img:"./images/gaseosa.webp"},
+  {id:3, name:"Leche entera 1L", category:"Lácteos", weightKg:1.03, slots:1, utility:7, img:"./images/leche.webp"},
+  {id:4, name:"Arroz 1kg", category:"Almacén", weightKg:1.00, slots:1, utility:8, img:"./images/arrooz.webp"},
+  {id:5, name:"Fideos 500g", category:"Almacén", weightKg:0.50, slots:1, utility:6, img:"./images/fideos.webp"},
+  {id:6, name:"Aceite 900ml", category:"Almacén", weightKg:0.82, slots:1, utility:7, img:"./images/aceite.webp"},
+  {id:7, name:"Azúcar 1kg", category:"Almacén", weightKg:1.00, slots:1, utility:6, img:"./images/azucar.webp"},
+  {id:8, name:"Harina 000 1kg", category:"Almacén", weightKg:1.00, slots:1, utility:6, img:"./images/harina.webp"},
+  {id:9, name:"Yerba 1kg", category:"Almacén", weightKg:1.00, slots:1, utility:8, img:"./images/yerba.webp"},
+  {id:10, name:"Café 500g", category:"Almacén", weightKg:0.50, slots:1, utility:7, img:"./images/cafe.webp"},
+  {id:11, name:"Pan lactal 600g", category:"Panificados", weightKg:0.60, slots:1, utility:6, img:"./images/pan.webp"},
+  {id:12, name:"Galletitas 250g", category:"Snacks", weightKg:0.25, slots:1, utility:4, img:"./images/galletitas.webp"},
+  {id:13, name:"Manzanas 1kg", category:"Frescos", weightKg:1.00, slots:1, utility:7, img:"./images/manzana.webp"},
+  {id:14, name:"Tomate perita 1kg", category:"Frescos", weightKg:1.00, slots:1, utility:6, img:"./images/tomate.webp"},
+  {id:15, name:"Queso cremoso 500g", category:"Lácteos", weightKg:0.50, slots:1, utility:7, img:"./images/queso.webp"},
+  {id:16, name:"Carne picada 500g", category:"Carnes", weightKg:0.50, slots:1, utility:8, img:"./images/carne.webp"},
+  {id:17, name:"Pollo entero 1.8kg", category:"Carnes", weightKg:1.80, slots:1, utility:9, img:"./images/pollo.webp"},
+  {id:18, name:"Papel higiénico x12", category:"Limpieza", weightKg:1.20, slots:2, utility:5, img:"./images/ppapel.webp"},
+  {id:19, name:"Detergente 500ml", category:"Limpieza", weightKg:0.55, slots:1, utility:5, img:"./images/detergente.webp"},
+  {id:20, name:"Shampoo 400ml", category:"Higiene", weightKg:0.42, slots:1, utility:5, img:"./images/shampoo.webp"}
+];

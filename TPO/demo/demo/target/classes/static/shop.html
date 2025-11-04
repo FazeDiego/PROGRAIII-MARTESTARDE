@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rute.AR | Demo</title>
+    <link rel="stylesheet" href="./css/shop.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <header class="navbar">
+      <div class="nav-content">
+        <div class="logo">Rute.AR</div>
+        <nav>
+          <a href="/shop.html" class="active">Shop</a>
+          <a href="/map.html">Ver recorrido</a>
+        </nav>
+        <div id="openCart" class="cart-icon">
+          <img class="cart-img" src="./images/carticon.png" alt="cart" />
+          <span id="cartCount">0</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="hero-banner">
+      <img src="./images/banner.webp" alt="banner" />
+      <div class="hero-overlay"></div>
+      <div class="hero-text">
+        <h1>Shop</h1>
+        <p>Seleccioná productos y optimizá tu pedido automáticamente!</p>
+      </div>
+    </div>
+
+    <section class="products-container" id="productGrid"></section>
+
+    <div id="cartOverlay" class="cart-overlay"></div>
+
+    <aside id="cartPanel" class="cart-panel">
+      <button id="closeCart" class="cart-close-btn">✕</button>
+      <h2>Carrito</h2>
+
+      <div id="cartItems" class="cart-items"></div>
+
+      <div class="cart-footer">
+        <div class="cart-stats">
+          <span>Slots: <span id="slotCount">0</span>/10</span>
+          <span>Peso: <span id="weightCount">0</span>/5kg</span>
+          <span>Utility: <span id="utilityCount">0</span></span>
+        </div>
+        <button id="optimizeBtn" class="btn-primary">
+          Generar recomendación
+        </button>
+        <button id="clearCart" class="btn-secondary">Vaciar carrito</button>
+      </div>
+    </aside>
+
+    <!-- modal -->
+    <div id="infoOverlay" class="info-overlay" aria-hidden="true"></div>
+    <div
+      id="infoModal"
+      class="info-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="infoTitle"
+      aria-describedby="infoDesc"
+    >
+      <button id="closeInfo" class="info-close" aria-label="Cerrar">✕</button>
+
+      <h2 id="infoTitle">¿Cómo funciona la optimización?</h2>
+      <p id="infoDesc">
+        El sistema arma una recomendación óptima con restricciones de
+        <strong>Slots</strong> y <strong>Peso</strong> para maximizar la
+        <strong>Utility</strong>.
+      </p>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>Slots</h3>
+          <p>
+            Capacidad de volumen (espacio en la mochila). Tenés un máximo de
+            <strong>10 slots</strong>.
+          </p>
+        </div>
+        <div class="info-card">
+          <h3>Peso</h3>
+          <p>Tope de peso total. En esta demo es de <strong>5 kg</strong>.</p>
+        </div>
+        <div class="info-card">
+          <h3>Utility</h3>
+          <p>
+            “Valor” o prioridad de cada producto. La recomendación busca
+            <strong>maximizar</strong> esta suma.
+          </p>
+        </div>
+      </div>
+
+      <hr class="info-sep" />
+
+      <h3>Algoritmos que usamos</h3>
+      <ul class="info-list">
+        <li>
+          <strong>Programación Dinámica (Knapsack 0/1)</strong>: Calcula la
+          mejor combinación factible bajo <em>slots</em> y
+          <em>peso</em> maximizando la <em>utility</em>.
+        </li>
+        <li>
+          <strong>Backtracking</strong>: Se usa para reconstruir la solución
+          elegida (qué ítems tomar) a partir de la tabla de DP.
+        </li>
+        <li>
+          <strong>Divide & Conquer (variantes)</strong>: Generamos alternativas
+          “top” restringiendo parcialmente el problema (p. ej., prohibiendo el
+          producto más influyente o ajustando capacidad) y luego comparamos para
+          mostrarte hasta 4 recomendaciones.
+        </li>
+      </ul>
+
+      <div class="info-actions">
+        <button id="closeInfo2" class="btn-secondary">Entendido</button>
+      </div>
+    </div>
+    <!-- librerias -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+
+    <!-- app -->
+    <link rel="stylesheet" href="./css/shop.css?v=prod-1" />
+    <script src="./js/products.js?v=prod-1"></script>
+    <script src="./js/flytocart.jquery.js?v=prod-1"></script>
+    <script src="./js/shop.js?v=prod-1"></script>
+  </body>
+</html>

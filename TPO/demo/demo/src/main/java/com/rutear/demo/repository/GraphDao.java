@@ -1,0 +1,226 @@
+package com.rutear.demo.repository;
+
+import com.rutear.demo.dto.CornerDTO;
+import com.rutear.demo.dto.NeighborRow;
+import com.rutear.demo.dto.PoiDTO; // 👈 nuevo import para los POI
+import org.springframework.data.neo4j.core.Neo4jClient;
+import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.List;
+
+@Component
+public class GraphDao {
+
+  private final Neo4jClient neo4j;
+
+  public GraphDao(Neo4jClient neo4j) {
+    this.neo4j = neo4j;
+  }
+
+  // ================= EXISTENTE =================
+  // Vecinos (usado por Dijkstra, BFS, DFS)
+  public Collection<NeighborRow> neighbors(String id) {
+    return neo4j.query("""
+        MATCH (:Corner {id:$id})-[r:ROAD]->(b:Corner)
+        RETURN b.id AS toId,
+               r.distance    AS distance,
+               r.traffic     AS traffic,
+               r.risk        AS risk,
+               r.timePenalty AS timePenalty
+        """)
+        .bind(id).to("id")
+        .fetchAs(NeighborRow.class)
+        .mappedBy((ts, rec) -> new NeighborRow(
+            rec.get("toId").asString(),
+            rec.get("distance").asDouble(),
+            rec.get("traffic").asDouble(),
+            rec.get("risk").asDouble(),
+            rec.get("timePenalty").asDouble()
+        ))
+        .all();
+  }
+
+  // ================= EXISTENTE =================
+  // Listar todos los Corners (para el front)
+  public List<CornerDTO> allCorners(int limit) {
+    return neo4j.query("""
+        MATCH (c:Corner)
+        RETURN c.id AS id, c.name AS name, c.lat AS lat, c.lng AS lng
+        ORDER BY toInteger(replace(c.id,'C',''))
+        LIMIT $limit
+        """)
+      .bind(limit).to("limit")
+      .fetchAs(CornerDTO.class)
+      .mappedBy((ts, rec) -> new CornerDTO(
+          rec.get("id").asString(),
+          rec.get("name").asString(null),
+          rec.get("lat").asDouble(),
+          rec.get("lng").asDouble()
+      ))
+      .all().stream().toList();
+  }
+
+  // =====================================================
+  // 🔍 NUEVO 1: Buscar POIs asociados a una esquina dada
+  // =====================================================
+  public Collection<PoiDTO> poisAtCorner(String cornerId, List<String> types) {
+    return neo4j.query("""
+        MATCH (:Corner {id:$id})<-[:NEAR]-(p:POI)
+        WHERE $types IS NULL OR p.type IN $types
+        RETURN p.id AS id,
+               p.name AS name,
+               p.type AS type,
+               p.lat AS lat,
+               p.lng AS lng
+        """)
+      .bind(cornerId).to("id")
+      .bind(types).to("types")
+      .fetchAs(PoiDTO.class)
+      .mappedBy((ts, rec) -> new PoiDTO(
+          rec.get("id").asString(),
+          rec.get("name").asString(),
+          rec.get("type").asString(),
+          rec.get("lat").asDouble(),
+          rec.get("lng").asDouble(),
+          0 // depth se calcula en GraphServiceImpl
+      ))
+      .all();
+  }
+
+  // =====================================================
+  // 🔧 NUEVO 2: Helper opcional para convertir CSV a lista
+  // =====================================================
+  public static List<String> parseTypes(String csv) {
+    if (csv == null || csv.isBlank()) return null;
+    return java.util.Arrays.stream(csv.split(","))
+        .map(String::trim)
+        .filter(s -> !s.isEmpty())
+        .toList();
+  }
+
+  // =====================================================
+  // 🔍 NUEVO 3: Buscar POIs usando BFS dentro de un radio
+  // =====================================================
+  public List<PoiDTO> findPoisBfs(String startId, int maxDepth, String typeRegex) {
+    return neo4j.query("""
+        MATCH (start:Corner {id:$id})
+        MATCH p=(start)-[:ROAD*1..$depth]->(c:Corner)<-[:NEAR]-(poi:POI)
+        WHERE poi.type =~ $regex
+        RETURN DISTINCT poi.id AS id, poi.name AS name, poi.type AS type,
+               poi.lat AS lat, poi.lng AS lng
+        ORDER BY name
+        """)
+        .bind(startId).to("id")
+        .bind(maxDepth).to("depth")
+        .bind(typeRegex).to("regex")
+        .fetchAs(PoiDTO.class)
+        .mappedBy((ts, rec) -> new PoiDTO(
+            rec.get("id").asString(),
+            rec.get("name").asString(null),
+            rec.get("type").asString(null),
+            rec.get("lat").asDouble(),
+            rec.get("lng").asDouble(),
+            0 // depth no se calcula en esta query
+        ))
+        .all().stream().toList();
+  }
+
+  // =====================================================
+  // 🔍 NUEVO 4: POIs a lo largo de un camino específico
+  // =====================================================
+  public List<PoiDTO> poisAlongPath(List<String> cornerIds, String typeRegex) {
+    if (cornerIds == null || cornerIds.isEmpty()) return List.of();
+    return neo4j.query("""
+        UNWIND $ids AS cid
+        MATCH (c:Corner {id:cid})<-[:NEAR]-(poi:POI)
+        WHERE poi.type =~ $regex
+        RETURN DISTINCT poi.id AS id, poi.name AS name, poi.type AS type,
+               poi.lat AS lat, poi.lng AS lng
+        ORDER BY name
+        """)
+        .bind(cornerIds).to("ids")
+        .bind(typeRegex).to("regex")
+        .fetchAs(PoiDTO.class)
+        .mappedBy((ts, rec) -> new PoiDTO(
+            rec.get("id").asString(),
+            rec.get("name").asString(null),
+            rec.get("type").asString(null),
+            rec.get("lat").asDouble(),
+            rec.get("lng").asDouble(),
+            0 // depth no aplica aquí
+        ))
+        .all().stream().toList();
+  }
+
+  // =====================================================
+  // 🔍 NUEVO 5: POIs cercanos por BFS (directamente desde Corner a POI)
+  // =====================================================
+  public List<PoiDTO> poisNear(String startId, int maxDepth, java.util.Set<String> types) {
+    // maxDepth de fallback
+    int depth = Math.max(1, maxDepth);
+
+    // Busca POIs conectados directamente desde Corners vía ROAD
+    String cypher = """
+        MATCH (s:Corner {id:$start})
+        MATCH p = (s)-[:ROAD*1..5]->(poi:POI)
+        WHERE length(p) <= $maxDepth
+          AND ($types IS NULL OR poi.type IN $types)
+        WITH poi, min(length(p)) AS hops
+        RETURN poi.id AS id, poi.name AS name, poi.type AS type, poi.lat AS lat, poi.lng AS lng, hops
+        ORDER BY hops ASC, name ASC
+        LIMIT 200
+      """;
+
+    return neo4j.query(cypher)
+        .bind(startId).to("start")
+        .bind(depth).to("maxDepth")
+        .bind((types == null || types.isEmpty()) ? null : types).to("types")
+        .fetchAs(PoiDTO.class)
+        .mappedBy((ts, rec) -> new PoiDTO(
+            rec.get("id").asString(),
+            rec.get("name").asString(null),
+            rec.get("type").asString(null),
+            rec.get("lat").asDouble(),
+            rec.get("lng").asDouble(),
+            rec.get("hops").asInt()
+        ))
+        .all().stream().toList();
+  }
+
+  // =====================================================
+  // 🔍 NUEVO 6: POIs cercanos (para Neo4j Aura)
+  // =====================================================
+  public List<PoiDTO> findNearbyPois(String startId, int depth, String[] types) {
+    // Construir el query dinámicamente con el depth como literal
+    String query = String.format("""
+        MATCH (c0:Corner {id:$start})
+        MATCH path = (c0)-[:ROAD*1..%d]->(poi:POI)
+        WHERE poi.type IN $types
+        WITH poi, length(path) AS hops
+        RETURN DISTINCT poi.id   AS id,
+                        poi.name AS name,
+                        poi.type AS type,
+                        poi.lat  AS lat,
+                        poi.lng  AS lng,
+                        hops
+        ORDER BY type, id
+        LIMIT 300
+        """, depth);
+        
+    return neo4j.query(query)
+        .bind(startId).to("start")
+        .bind(java.util.Arrays.asList(types)).to("types")
+        .fetchAs(PoiDTO.class)
+        .mappedBy((rs, rec) -> new PoiDTO(
+            rec.get("id").asString(),
+            rec.get("name").asString(null),
+            rec.get("type").asString(),
+            rec.get("lat").asDouble(),
+            rec.get("lng").asDouble(),
+            rec.get("hops").asInt(0)
+        ))
+        .all().stream().toList();
+  }
+
+}
